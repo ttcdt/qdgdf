@@ -1,0 +1,194 @@
+The QDGDF Cookbook
+==================
+
+This document explains some tricks to be used with the Quick and Dirty
+Game Development Framework (QDGDF) libraries.
+
+Blending two images into one
+----------------------------
+
+You can easily blend two images into one by using the qdgdfv_blend_color()
+function. This code uses it:
+
+ /* these buffers hold the screen images */
+ unsigned char image1[SCREEN_SIZE];
+ unsigned char image2[SCREEN_SIZE];
+ 
+ void blend_two_screens(void)
+ {
+	int n;
+ 
+	for(n = 0; n < SCREEN_SIZE; n++) {
+		_qdgdfv_virtual_screen[n] =
+			qdgdfv_blend_color(image1[n], image2[n], 50);
+	}
+
+	qdgdfv_dump_virtual_screen();
+}
+
+In this case, the final image is a 50% blend of both images. You can also
+implement a fade out / fade in (as those shown in films) by looping the
+percent argument from 0 to 100. Don't forget though that
+qdgdfv_blend_color() is slow; you can pre-generate lookup tables of
+blended colors (for, say, 20%, 40%, 60% and 80% blend factors) as in the
+following example:
+
+ /* pre-generated blend tables */
+ unsigned char _blend_tbl_20[256][256];
+ unsigned char _blend_tbl_40[256][256];
+ unsigned char _blend_tbl_60[256][256];
+ unsigned char _blend_tbl_80[256][256];
+ 
+ void pregen_blend_tables(void)
+ {
+	 int x, y;
+ 
+	 for(x = 0; x < 256; x++)
+		 for(y = 0; y < 256; y++)
+			 _blend_tbl_20[x][y] = qdgdfv_blend_color(x, y, 20);
+ 
+	 for(x = 0; x < 256; x++)
+		 for(y = 0; y < 256; y++)
+			 _blend_tbl_40[x][y] = qdgdfv_blend_color(x, y, 40);
+ 
+	 for(x = 0; x < 256; x++)
+		 for(y = 0; y < 256; y++)
+			 _blend_tbl_60[x][y] = qdgdfv_blend_color(x, y, 60);
+ 
+	 for(x = 0; x < 256; x++)
+		 for(y = 0; y < 256; y++)
+			 _blend_tbl_80[x][y] = qdgdfv_blend_color(x, y, 80);
+ }
+
+Then you can use those tables instead of qdgdfv_blend_color(). Consider
+also pregenerating all 100 lookup tables if you plan to intesively use
+color blending (they will use 256 * 256 * 100 bytes, 6400 Kb).
+
+You can achieve similar fading and smoothing effects by using the
+accumulation buffer; see below.
+
+Building and using light tables
+-------------------------------
+
+Light tables are built to easily apply a light level to a group of colors.
+QDGDF includes two functions to create them:
+
+ /* basic light table */
+ void qdgdfv_build_light_table(unsigned char * lut, int levels, int mid);
+ 
+ /* coloured light table */
+ void qdgdfv_build_light_table_ext(unsigned char * lut, int levels,
+	int mid, int fr, int fg, int fb);
+
+In both cases, the _lut_ argument must point to a buffer like
+
+ #define LIGHT_LEVELS 16
+ unsigned char lut[LIGHT_LEVELS][256];
+
+Of course, the light levels can be whatever you want.
+
+The _mid_ argument is the *middle light level*. This light level is the one
+in which colors are exactly as defined in the palette, that is, 100% lit.
+Any light level below _mid_ will contain colors slightly dimmed (to the 0
+level, where they are all almost black) and any light level from _mid_
+will contain saturated colors. If you set _mid_ to LIGHT_LEVELS - 1, you
+won't have saturated colors if you don't need them.
+
+So, to create a normal light table you should use
+
+ qdgdfv_build_light_table(unsigned char *)&lut,
+	LIGHT_LEVELS, LIGHT_LEVELS - 1);
+
+and get color with different light levels doing
+
+ unsigned char color;
+ unsigned char lighted_color;
+ 
+ /* pixel in the darkness */
+ lighted_color = lut[0][color];
+ 
+ /* pixel in the twilight zone */
+ lighted_color = lut[7][color];
+ 
+ /* pixel completely lit */
+ lighted_color = lut[15][color];
+
+This basic light tables can be used for depth cueing effects if you
+calculate the light level as inversely proportional to the distance of the
+pixel.
+
+All these examples use a _black_ light table, that is, colors with light
+applied on them look as they are, and colors without it fade to black. To
+achieve interesting effects as fogs or hazes, you can use a light table
+that fades to another color. If you want to use white fog, you can just
+use the following function:
+
+ qdgdfv_build_light_table_ext(unsigned char *)&lut,
+	LIGHT_LEVELS, LIGHT_LEVELS - 1, 255, 255, 255);
+
+which is the same as qdgdfv_build_light_table(), but telling it what color
+should have the pixels without light. Of course, all three r, g, b factors
+can be different. In any other case, this light table can be used exactly
+the same.
+
+Using the accumulation buffer
+-----------------------------
+
+The accumulation buffer can be used to implement motion blur or object
+movement trails. It's set by the function
+
+ void qdgdfv_set_accum_buffer(int percent);
+
+By default, no accumulation buffer is active. When an accumulation buffer
+is created by calling this function with an argument different from 0,
+anytime the virtual screen is dumped the previously drawn frame is blended with
+the current one using _percent_ as a blending ratio. As a result, the previous
+frame seems to remain blurred, intermixed with the content of the virtual
+screen. This makes transitions smoother, but can be confusing if percent
+is high (values over 50% tend to blur too much or saturate to bright
+colors). Using the accumulation buffer with a high percent when the game's
+main character is poisoned or motion sick looks great if an overall game
+speed reduction is also done.
+
+Gamma correction
+----------------
+
+Sometimes the combination of monitor screen, room ambient light and
+hardware quality seems to make the game view too dark. The overall
+brightness of the generated colors can be controlled with the following
+variable:
+
+ int _qdgdfv_gamma_correct;
+
+This variable ranges from 0 (colors are the same as defined in the
+palette) to 255 (completely saturate). It's a good idea to ask the user
+to set this variable with a menu, slider or similar widget. Take into
+account that you must re-set the palette using qdgdfv_set_palette()
+for the value in _qdgdfv_gamma_correct to be effective.
+
+KTL font file format
+--------------------
+
+The KTL fonts use an ancient format that I used in KGE (Kaplan Graphical
+Environment), an old MSDOS library for embedded graphical environments.
+It had many special purpose resources, focused mainly in small memory
+footprints and ease of use. KTL fonts have an 8 bytes header like this
+
+ struct ktl_header
+ {
+	unsigned char height;	/* font height in pixels */
+	unsigned char width;	/* font width in bytes (1) */
+	unsigned char prop;	/* proportional flag (0) */
+	char filler[5]; 	/* filler to 8 bytes */
+ };
+
+followed by 256 glyphs of _height_ * _width_ bytes for the 256 available
+characters, coded in the PC VGA charset. Instead of what it can be told from
+the header, there are no proportional (_prop_ is always 0) nor width other
+than 1 (eight pixels) fonts.
+
+QDGDF remaps the charset transparently so that ISO-8859-1 (latin1) encoding
+is used in the string printing code (qdgdfv_font_print()).
+
+----
+Angel Ortega <angel@triptico.com>

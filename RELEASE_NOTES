@@ -1,0 +1,110 @@
+QDGDF Release Notes
+===================
+
+1.00
+----
+
+We (the TTCDT Dev Team) have taken over maintenance of this odd library
+from Angel Ortega, the original author. He is no longer interested in working
+on it. We neither, but we'll take the minimal care of it. I've released this
+version as 1.00 just because I want to, not because of any significant changes
+from previous version [Ted from ttcdt].
+
+ - New features:
+    - New function qdgdfv_write_tga().
+    - New variables _qdgdfv_key_alt_l and _qdgdfv_key_alt_r.
+    - New config option --without-opengl.
+    - Generates 64 bit MS Windows binaries by default if using mingw32.
+ - Bug fixes:
+    - qdgdfv_font_size() now works correctly with non-ASCII characters.
+    - Fixed a memory management defect in qdgdfv_load_ktl_font().
+
+0.96
+----
+
+ - New features:
+    - New embedded tar feature.
+
+0.95
+----
+
+ - License change: released into the public domain.
+ - Other changes:
+   - The version numbering has changed from X.X.X to X.XXX (real number).
+
+0.9.4
+-----
+
+ * Added a new ARGB virtual screen.
+ * Fixed X11 compilation when OpenGL is not available.
+
+0.9.3
+-----
+
+ * Added OpenGL support. With this new feature, QDGDF now can be
+   used as a system-independent OpenGL framework similar to GLUT.
+
+0.9.2
+-----
+
+ * A new windowed mode for Win32.
+ * A new library libqdgdf.a is created (historical libqdgdfv.a and
+   libqdgdfa.a are also still created).
+ * KTL fonts are now automatically converted to proportional width
+   if the new `_qdgdfv_convert_ktl_to_proportional' variable is set.
+ * New variable `_qdgdfv_full_screen', settable before startup to
+   suggest the desired behaviour (full screen or windowed). Also
+   filled after startup.
+ * New array `_qdgdfv_extended_palette', filled with RGB values for each
+   palette entry.
+ * New functions qdgdfv_path_find() and qdgdfa_path_find(), to return
+   the full path to a file search in the configured paths.
+ * A new (very basic) information program (qdgdf_i) is included.
+ * New functions qdgdfv_scale2x_p() and qdgdfv_scale3x_p(), implementing
+   the scale2x and scale3x algorithms.
+ * Shadows in fonts are painted in black color, not just color 0.
+
+0.9.1
+-----
+
+ * A new function has been added, qdgdfv_load_pcx_pal(), that loads
+   a 256 color PCX file and rearranges it to match the current palette.
+ * A new function has been added, qdgdfv_load_pcx_pal_set(), that loads
+   a 256 color PCX file and sets its palette as the active one.
+ * New functions qdgdfv_home_dir() and qdgdfa_home_dir(), that return
+   a path where a game can create a directory and/or write data.
+ * New functions qdgdfv_app_dir() and qdgdfa_app_dir(), that return
+   a path where a game can look for its application data (as bitmaps and
+   such), probably where the installer copied the game.
+
+0.9.0
+-----
+
+ * The function qdgdfa_set_attenuation() has been added. It allows to
+   attenuate (i.e. lower the volume of) a sound given its handle.
+ * The _qdgdfv_double_mode variable has been obsoleted in favour to
+   _qdgdfv_scale. Giving it a value of 1 emulates the old behaviour
+   of _qdgdfv_double_mode, but offers more possibilities (for example,
+   the X11 driver allows a scale value of 3).
+ * There are four new key variables; _qdgdfv_key_pgup, _qdgdfv_key_pgdn,
+   _qdgdfv_key_home and _qdgdfv_key_end.
+ * The build system has been improved; now, it's just a matter of
+   running `config.sh && make'. Needed libraries are written to the
+   config.ldflags file, so it's easier to know what libraries will be
+   needed by your program.
+ * The new build system includes support for mingw32, so it's easier
+   than ever to build everything from a Unix-like system (you no longer
+   need MS Windows to build win32 QDGDF games).
+ * qdgdfv_fopen() now have a configurable path search, stored in the
+   _qdgdfv_fopen_path string variable as a list of semicolor-separated
+   search path.
+ * Grave errors have been fixed in the linux sound daemon.
+ * X11 8bpp (256 color) mode works again.
+ * Alphanumeric keys work again under win32.
+ * The function qdgdfv_extended_key_status() has been added, so that
+   additional information as 'just-pressed' or 'just-released' can be
+   obtained about the keys.
+ * The function qdgdf_assert_in_virtual_screen() has been added, to know
+   if a pointer falls inside the virtual screen space.
+ * The prototype for qdgdfv_load_palette() has been restored to the
+   header files.

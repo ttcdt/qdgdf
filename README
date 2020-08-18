@@ -1,0 +1,279 @@
+QDGDF README
+============
+
+ QDGDF - Quick and Dirty Game Development Framework
+ ttcdt <dev@triptico.com>
+ Home Page: https://triptico.com/software/qdgdf.html
+
+This software has been released into the public domain. See file LICENSE
+for details.
+
+This library was originally written by Angel Ortega. The TTCDT Dev Team
+took over its maintenance in 2019. Don't take the 'maintenance' word
+too seriously.
+
+Intro
+-----
+
+QDGDF stands for Quick and Dirty Game Development Framework, and it's a
+set of libraries designed to allow fast development of games under a
+variety of systems. Its main goal is to show a platform-independent,
+simple, consistent game programming interface to several platforms, but
+keeping it small enough to be included (embedded) with each gaming project
+(and not as a separately installable package).
+
+QDGDF has two libraries: qdgdfv (Video) and qdgdfa (Audio) that can be used
+independently from each other. They are built as static libraries only.
+
+qdgdfv
+------
+
+qdgdfv (Video library) implements a virtual screen (framebuffer). Though
+this virtual screen uses 8 bit depth (256 color) mode, the real screen can
+use any depth. The supported systems as of the current version are:
+
+ * X11 Window System in 8, 15, 16, 24 and 32 pixel depths.
+ * MS Windows DirectX.
+ * DJGPP.
+ * Linux SVGALIB.
+
+As it is an internal 256 color mode, a palette must be provided. A
+highly optimized one is included if you don't supply it. Also, the
+necessary functions to load 256-color PCX files (they must all use the
+same palette) are also provided. Later qdgdfv versions won't be so
+palette-dependent and will provide three virtual screens for real 24
+bit RGB operation.
+
+This library also implements basic keyboard input (sorry, no joystick nor
+mouse in this version), filling a short set of variables with current
+cursor key (and some modifiers) status.
+
+In X11, windowed mode is always used, and both horizontal and vertical
+sizes can be set to any reasonable value. A special double-mode flag can
+also be activated, in case of a huge screen resolution with tiny pixels is
+active.
+
+Full screen mode is always used under win32. As it uses DirectX, the screen
+dimensions are limited to usual resolutions (640x480, 800x600, etc.). Not
+all of them are available in all hardware, just experiment. If the resolution
+you ask for isn't available but the double one does, double-mode is
+automaticly activated (say, if you ask for an unavailable 320x200, 640x400
+double-mode can be used). So, remember to check the contents of screen's x
+and y size after initialization, as they could have changed from what you
+had set.
+
+DJGPP and SVGALIB versions use only fullscreen 320x200 resolutions modes.
+
+qdgdfa
+------
+
+qdgdfa (Audio library) lets you launch previously loaded sounds
+simultaneously. It can use 8 and/or 16 bit mono sounds in 8 and/or 16
+bit mono/stereo soundcards at a 11025 sampling rate, providing the necessary
+conversions. Though sounds must be mono (i.e., they only have one channel),
+they are played in stereo, so it's possible to set the pan in play time to
+whatever you want.
+
+Wav files (.wav) are supported (remember, sampled at 11025 Hz). 16 bit mode
+will be used unless explicitly requested or hardware limited. You don't have
+to take the endianess of the CPU into account as sounds are byte-swapped if
+needed.
+
+In Linux systems, qdgdfa uses the OSS Free interface (no ALSA by now,
+sorry). A new process is forked to attend the sound mixing; it
+communicates with the main one via a pipe. It can also use the esd
+(enlightened sound daemon); see below on how to compile support for it.
+
+In MS Windows, DirectSound is used.
+
+Compilation, installation and usage
+-----------------------------------
+
+To include QDGDF in your project, just uncompress the QDGDF sources in
+a subdirectory below it, and call it qdgdf. System specific instructions
+follow.
+
+UNIX/Linux
+~~~~~~~~~~
+
+Under UNIX systems, cd to qdgdf/ and type
+
+ ./config.sh
+ make
+
+If you have a usable build system for X11 and / or SVGALIB, support for them
+will be automatically included. If both are, the X11 driver will be tried
+first on startup; if no connection to an X server is possible, the SVGALIB
+will be tried instead.
+
+Once built, you'll have two libraries, libqdgdfv.a and libqdgdfa.a. Include
+the qdgdf_video.h and qdgdf_audio.h headers in your C code and link against
+that libraries. Two files, called 'config.cflags' and 'config.ldflags' will
+contain the necessary compiler and linker directives for your program to
+be built, respectively.
+
+So, for example, if your game is in game.c, build it as:
+
+  $CC game.c -Iqdgdf -Lqdgdf `cat qdgdf/config.cflags` \
+	`cat qdgdf/config.ldflags` -o game
+
+See README.mingw32 to know how to build the libraries using the mingw32
+cross-compiler.
+
+MS Windows DirectX
+~~~~~~~~~~~~~~~~~~
+
+To build the libraries under MS Windows, you'll need Borland C. You can
+download Borland C's command line tools for free from their web site.
+Once installed, cd to qdgdf/ and run the .BAT file:
+
+  buildbcc.bat
+
+And you'll end up with two libraries, qdgdfv.lib and qdgdfa.lib. Include
+the qdgdf_video.h and qdgdf_audio.h headers in your C code and link against
+that libraries. You'll also need the DirectX libraries, of course. They are
+called ddraw.lib and dsound.lib and are included with Borland C. So, compile
+your program as follow:
+
+  bcc32 -tW -Iqdgdf -Lqdgdf game.c ddraw.lib dsound.lib qdgdfv.lib qdgdfa.lib
+
+DJGPP
+~~~~~
+
+To build the libraries with the DJGPP compiler, just cd to qdgdf/ and run
+the .BAT file:
+
+  builddjg.bat
+
+And you'll end up with two libraries, libqdgdfv.a and libqdgdfa.a. See the
+UNIX/Linux section for details.
+
+Building a cross-platform game in one evening
+---------------------------------------------
+
+Think a plot for your game. All game plots suck, so don't treat
+yourself too badly here.
+
+In your favorite bitmap editor tool, draw the characters / enemies /
+objects / decorations. Set all of them to the provided palette, and
+save them as 256 color PCX files.
+
+Drag the Internet looking for appropriate sounds for jumping / dying /
+shooting / whatever. Convert all of them to 11025 Hz using your
+favorite sound conversion tool.
+
+Open your text editor and start to type C code:
+
+	#ifdef __WIN32__
+	#include <windows.h>
+	#endif
+
+	#include <stdio.h>
+	#include "qdgdf_video.h"
+	#include "qdgdf_audio.h"
+
+You won't be too much surprised here; the usual mumbo-jumbo, and the
+qdgdf header files. The #ifdef __WIN32__ is necessary for WinMain.
+
+	#ifdef __WIN32__
+	int __stdcall WinMain(HINSTANCE hi, HINSTANCE hpi, LPSTR cmd, int cm)
+	{
+		_qdgdfv_additional_int_info=(int)hi;
+	#else
+	int main(void)
+	{
+	#endif
+
+will work. You'll notice a strange thing: that (int)hi assignment.
+As you'll suppose, that WinMain parameter is necessary for DirectDraw
+objects. Blame Microsoft.
+
+Before QDGDF startup, you need to set up some values. Here there
+you have some of them:
+
+	/* use 16 bit sound whenever possible */
+	_qdgdfa_16_bit=1;
+	/* use 320 x 200 resolution */
+	_qdgdfv_screen_x_size=320;
+	_qdgdfv_screen_y_size=200;
+	/* the clear color */
+	_qdgdfv_clear_color=0;
+	/* window title(s) */
+	strcpy(_qdgdfv_window_title, "awesome qdgdf based game");
+	strcpy(_qdgdfa_window_title,_qdgdfv_window_title);
+
+And then, the real startup:
+
+	qdgdfa_startup();
+	qdgdfv_startup();
+
+Wow. You'll ready for doing game things; let's start another step.
+
+Of course, you need to load the bitmaps and sounds you have ready for
+that game. Load the pictures with:
+
+	unsigned char good_guy[16*16];
+	unsigned char bad_guy[16*16];
+	unsigned char background[512*300];
+ 
+	qdgdfv_load_pcx(good_guy,"good_guy.pcx",16*16);
+	qdgdfv_load_pcx(bad_guy,"bad_guy.pcx",16*16);
+	qdgdfv_load_pcx(background,"the_deep_space_background.pcx",512*300);
+
+Loading sounds isn't harder:
+
+	int shoot_sound, player_die_sound, evil_laugh_sound;
+ 
+	shoot_sound=qdgdfa_load_sound("gun_shot.wav");
+	player_die_sound=qdgdfa_load_sound("aaaarrrgh.wav");
+	evil_laugh_sound=qdgdfa_load_sound("muaaahahaha.wav");
+
+Let's start to loop:
+
+	/* while player is alive (this variables are yours) */
+	while(_player_alive && !_aborted)
+	{
+		/* clear the virtual screen */
+		qdgdfv_clear_virtual_screen();
+ 
+		/* poll the input system */
+		qdgdfv_input_poll();
+ 
+		/* test the keys that were hit */
+		if(_qdgdfv_key_escape)
+			_aborted=1;
+ 
+		/* do whatever you must;
+		   _some_variable and _do_fire() are yours */
+		if(_qdgdfv_key_left)
+			_some_variable--;
+		if(_qdgdfv_key_right)
+			_some_variable++;
+		if(_qdgdfv_key_control_l)
+			_do_fire();
+ 
+		/* fill the virtual screen with whatever you want
+		   (preferably the good_guy, the bad_guy, etc.) */
+		/* ... */
+ 
+		/* finally, dump it out over the real screen */
+		qdgdfv_dump_virtual_screen();
+	}
+ 
+	/* game over, man!; exit cleanly */
+ 
+	qdgdfv_shutdown();
+	qdgdfa_shutdown();
+ 
+	return(0);
+
+The rest of steps are for you to write your game. Filling the gaps and
+writing a non-stinking AI and plot are left as an exercise to the reader (you).
+
+Misc Notes
+----------
+
+ * You can pick the QDGDF palette from the bitmap in bola.pcx ('bola' is
+   the main character from a very old, never finished game, now
+   the official logo for the Minimum Profit text editor).
+ * This is a quick and dirty work, but you can bet that it works.

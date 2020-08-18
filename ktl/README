@@ -1,0 +1,7 @@
+KTL Fonts for QDGDF
+===================
+
+This set of fonts were originally designed for the KGE (Kaplan Graphical
+Environment), an ancient framework for writing GUI applications under MSDOS.
+
+They can be used from inside QDGDF by calling qdgdfv_load_ktl_font().

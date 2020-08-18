@@ -1,0 +1,14 @@
+qdgdf_audio.o: qdgdf_audio.c config.h qdgdf_audio.h qdgdf_path.c
+qdgdf_audio_dsound.o: qdgdf_audio_dsound.c config.h qdgdf_audio.h
+qdgdf_audio_esd.o: qdgdf_audio_esd.c config.h qdgdf_audio.h
+qdgdf_audio_oss.o: qdgdf_audio_oss.c config.h qdgdf_audio.h
+qdgdf_path.o: qdgdf_path.c
+qdgdf_video.o: qdgdf_video.c config.h qdgdf_video.h qdgdf_path.c
+qdgdf_video_ddraw.o: qdgdf_video_ddraw.c config.h qdgdf_video.h
+qdgdf_video_djgpp.o: qdgdf_video_djgpp.c config.h qdgdf_video.h
+qdgdf_video_ext.o: qdgdf_video_ext.c config.h qdgdf_video_ext.h \
+  qdgdf_video.h
+qdgdf_video_font.o: qdgdf_video_font.c config.h qdgdf_video.h
+qdgdf_video_skeleton.o: qdgdf_video_skeleton.c config.h
+qdgdf_video_svgalib.o: qdgdf_video_svgalib.c config.h qdgdf_video.h
+qdgdf_video_x11.o: qdgdf_video_x11.c config.h qdgdf_video.h

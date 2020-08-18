@@ -1,0 +1,80 @@
+
+qdgdf - Quick and Dirty Game Development Framework
+Copyright (C) 1997-2003 Angel Ortega <angel@triptico.com>
+Home Page: http://www.triptico.com/software/qdgdf.html
+
+Changelog
+=========
+
+0.7.8 - sáb dic 13 11:14:35 CET 2003
+------------------------------------
+
+ - Massive cleaning to double screen dumping code.
+ - Double modes use the scale2x algorithm.
+ - Big sounds work in Linux.
+ - Many bugfixes.
+
+0.7.7 - dom abr  7 17:20:30 CEST 2002
+-------------------------------------
+
+ - A new accumulation buffer.
+
+ - New variable _qdgdfv_gamma_correct, to apply gamma correction.
+
+ - A new antialiased double mode, controlled by the
+   _qdgdfv_double_antialias variable.
+
+0.7.6 - dom feb 24 09:17:48 CET 2002
+------------------------------------
+
+ - Support for esound (enlightened sound daemon) in qdgdf_audio
+   (compilable using AUDIO=ESD).
+
+ - New key variables for the function keys.
+
+ - Bug fixed in the font charset encoding conversion.
+
+0.7.5 - dom feb  3 18:25:37 CET 2002
+------------------------------------
+
+ - New color blending code.
+
+ - New support for loading big sound files.
+
+0.7.4 - jue ene 10 16:50:37 CET 2002
+------------------------------------
+
+ - qdgdfa_play_sound() semantics has been unified between
+   platforms; a request to play a sound that is already
+   playing does nothing in all platforms.
+
+ - New qdgdfa_respawn_sound() function, to play a sound
+   that may be already playing.
+
+ - New qdgdfa_dup_sound() function, to duplicate a sound.
+
+ - It's no longer necessary to fill the _qdgdfa_window_title[]
+   string in win32 (in Linux it was never mandatory), as a valid
+   window handler is obtained by other ways. Anyway, it can
+   still be used.
+
+ - Some scancode fixings (win32).
+
+0.7.3 - dom nov 18 22:09:27 CET 2001
+------------------------------------
+
+ - Improved documentation.
+
+ - New qdgdfv_build_light_table_ext() function.
+
+ - More resolution timer using gettimeofday().
+
+0.7.2 - jue oct 11 21:14:59 CEST 2001
+-------------------------------------
+
+ - New qdgdfv_timer() function.
+
+ - New qdgdfv_build_light_table() function.
+
+ - Makefile tweaks for better OS detecting.
+

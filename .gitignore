@@ -1,0 +1,10 @@
+.config.log
+Makefile
+config.cflags
+config.h
+config.ldflags
+makefile.opts
+*.tar.gz
+*.[oa]
+qdgdf_i
+qdgdf_i.exe

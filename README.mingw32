@@ -1,0 +1,8 @@
+Building QDGDF libraries with mingw32
+=====================================
+
+    $ CC=i586-mingw32msvc-cc AR=i586-mingw32msvc-ar ./config.sh
+    $ make
+
+Substitute CC and AR with the names of your mingw32 c compiler and archiver,
+respectively, if they are different from these.

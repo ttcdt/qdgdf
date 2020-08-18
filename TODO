@@ -1,0 +1,78 @@
+QDGDF TODO / Bug List
+=====================
+
+Release Critical Bugs
+---------------------
+
+None!
+
+Open Bugs
+---------
+
+ * 1002: The DirectSound big sounds are not implemented.
+ * 1005: The WAV file loader should do resampling on-the-fly.
+ * 1009: Add scale 3 support to the ddraw driver.
+ * 1011: Add some way of knowing which architecture (or which driver)
+   is being used.
+ * 1013: All unix sound should use the internal sound daemon (even
+   daemon-based network sound systems like esd). It's the only way
+   to correctly implement IRIX, arts and such.
+ * 1014: Big sounds under unix loop bad (can be triggered by
+   using the default value of _qdgdfa_big_sound_threshold in
+   Space Plumber's menu music).
+ * 1015: The scale2x (and 3x) modes leave the last horizontal
+   line undrawn.
+ * 1025: The OSS driver should take into account that the frequency
+   could not be set (for hardware with fixed frequency).
+
+Pending Enhancements
+--------------------
+
+ * 1000: Add an skeleton program and a skeleton Makefile.
+ * 1001: Add a linux framebuffer driver.
+ * 1003: Add mouse support.
+ * 1004: Add joystick support.
+ * 1028: Try using windowed mode in DirectX to fix/dodge #1026.
+
+Closed
+------
+
+ * 1017: New function qdgdfa_set_attenuation(), to set the
+   attenuation of a sound (Sun, 28 Nov 2004 19:41:31 +0100).
+ * 1007: Create a new variable _qdgdfv_scale, to substitute
+   _qdgdfv_double_mode (Mon, 29 Nov 2004 16:02:27 +0100).
+ * 1008: Create a new triple mode, triggered by _qdgdfv_scale
+   (needs #1007 closed). (Mon, 29 Nov 2004 16:41:19 +0100).
+ * 1016: Add support for pgup, pgdn, home and end keys
+   (Mon, 20 Dec 2004 22:28:34 +0100).
+ * 1017: Add win32 detection to config.sh (Tue, 21 Dec 2004 10:37:29 +0100).
+ * 1012: Update build system (Tue, 21 Dec 2004 12:14:55 +0100).
+ * 1019: config.sh should fail if no video driver is found.
+   (Thu, 23 Dec 2004 08:12:26 +0100).
+ * 1010: Add a PATH-style string to qdgdfv_fopen(), where some
+   colon-separated paths are sequentially tried prepended to
+   the file to be open before banging (Sat, 08 Jan 2005 21:59:14 +0100).
+ * 1020: Sometimes the oss sound server receives a command split
+   in two, probably because of some pipe buffering issue; incomplete
+   commands should be enqueued to be processed later
+   (Sun, 09 Jan 2005 11:26:07 +0100).
+ * 1021: The X11 driver in 8 bpp is broken
+   (Thu, 13 Jan 2005 19:30:58 +0100).
+ * 1022: qdgdfa_set_attenuation() doesn't work in the dsound driver
+   (Closed by 1023; Sun, 23 Jan 2005 23:10:17 +0100).
+ * 1023: The playing status of a sound in the dsound buffer is
+   incorrectly detected. (Sun, 23 Jan 2005 23:11:10 +0100).
+ * 1024: Alphanumeric keys don't work in the ddraw driver
+   (Sun, 23 Jan 2005 23:59:44 +0100).
+ * 1018: Build system description in README is severely outdated
+   (Sun, 08 May 2005 10:57:30 +0200).
+ * 1006: There should exist another PCX file loader that adapts
+   each file's palette to the currently used one (instead of
+   ignoring it like the current one) (Sat, 26 Nov 2005 18:51:30 +0100).
+ * 1026: 320x200 and 640x400 video modes are broken under Win32, at
+   least on NVidia cards (No longer relevant;
+   Tue, 12 Jul 2011 16:44:38 +0200).
+ * 1027: Add an OpenGL driver (added in 0.9.3;
+   Wed, 20 Aug 2014 07:38:46 +0000).
+
+Email bugs to angel@triptico.com

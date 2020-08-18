@@ -1,0 +1,99 @@
+# -*- Mode: sh
+
+LIB_VIDEO=libqdgdfv.a
+LIB_AUDIO=libqdgdfa.a
+LIB_GLOBAL=libqdgdf.a
+LIBS=$(LIB_VIDEO) $(LIB_AUDIO) $(LIB_GLOBAL)
+
+PROJ=qdgdf
+GRUTATXT_DOCS=doc/QDGDF_Quick_Reference.html doc/The_QDGDF_Cookbook.html
+MP_DOCCER_DOCS=doc/qdgdf_api.txt
+G_AND_MP_DOCS=doc/qdgdf_api.html
+
+VIDEO_OBJS=qdgdf_video.o qdgdf_video_ext.o qdgdf_video_font.o $(VIDEO_DRV_OBJS)
+AUDIO_OBJS=qdgdf_audio.o $(AUDIO_DRV_OBJS)
+
+all: $(LIBS) $(DOCS) test
+
+DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
+
+##################################################################
+
+version:
+	@echo $(VERSION)
+
+.c.o:
+	$(CC) $(CFLAGS) `cat config.cflags` -c $<
+
+dep:
+	gcc -MM *.c > makefile.depend
+
+$(LIB_VIDEO): $(VIDEO_OBJS)
+	$(AR) rsv $(LIB_VIDEO) $(VIDEO_OBJS)
+
+$(LIB_AUDIO): $(AUDIO_OBJS)
+	$(AR) rsv $(LIB_AUDIO) $(AUDIO_OBJS)
+
+$(LIB_GLOBAL): $(VIDEO_OBJS) $(AUDIO_OBJS)
+	$(AR) rsv $(LIB_GLOBAL) $(VIDEO_OBJS) $(AUDIO_OBJS)
+
+libqdgdfv.so.0.0: $(VIDEO_OBJS)
+	gcc -g -shared -Wl,-soname,libqdgdfv.so.0 -o $@ $(VIDEO_OBJS) -lc
+
+libqdgdfa.so.0.0: $(AUDIO_OBJS)
+	gcc -g -shared -Wl,-soname,libqdgdfa.so.0 -o $@ $(AUDIO_OBJS) -lc
+
+docsclean:
+	rm -f $(MP_DOCCER_DOCS) doc/*.html
+
+clean:
+	rm -f $(LIBS) $(OBJS) *.o tags *.gz *.a *.lib *.so.0.0 *.exe qdgdf_i
+
+distclean: clean
+	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile
+
+realclean: distclean docsclean
+
+realdistclean: realclean
+
+docs: $(DOCS)
+
+.SUFFIXES: .txt .html
+
+.txt.html:
+	grutatxt -i $< -o $@
+
+doc/qdgdf_api.txt:
+	mp_doccer qdgdf_*.c -o doc/qdgdf_api -f grutatxt \
+		-a "Angel Ortega - angel@triptico.com" \
+		-b "This reference documents version $(VERSION) of the C API." \
+		-t "QDGDF API"
+
+distcopy: distclean
+	mkdir -p $(DIST_TARGET) ; \
+	tar cf - * | (cd $(DIST_TARGET) ; tar xf -)
+
+dist: distcopy
+	(cd /tmp ; tar czf - $(PROJ)-$(VERSION)/* ) > $(PROJ)-$(VERSION).tar.gz ; \
+	rm -rf $(DIST_TARGET)
+
+install:
+	install $(TARGET) $(PREFIX)/bin
+	mkdir -p $(PREFIX)/share/doc/$(PROJ)
+	cp doc/* $(PREFIX)/share/doc/$(PROJ)
+
+shared_install:
+	install -o root -g root -m 644 qdgdf_video.h qdgdf_audio.h qdgdf_video_ext.h $(SHARED_INC_PREFIX)
+	install -o root -g root -m 755 libqdgdfv.so.0.0 libqdgdfa.so.0.0 $(SHARED_LIB_PREFIX)
+	-ln -s $(SHARED_LIB_PREFIX)/libqdgdfv.so.0.0 $(SHARED_LIB_PREFIX)/libqdgdfv.so
+	-ln -s $(SHARED_LIB_PREFIX)/libqdgdfa.so.0.0 $(SHARED_LIB_PREFIX)/libqdgdfa.so
+	ldconfig -v
+
+qdgdf_i$(TARGET_EXT): qdgdf_i.c $(LIB_GLOBAL)
+	$(CC) `cat config.cflags` $< -L. -lqdgdf `cat config.ldflags` -o $@
+
+.PHONY: test
+test: qdgdf_i$(TARGET_EXT)
+
+Makefile: VERSION makefile.in
+	./config.sh $(CONF_ARGS)

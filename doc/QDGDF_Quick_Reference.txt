@@ -1,0 +1,201 @@
+QDGDF Quick Reference
+=====================
+
+A quick (and dirty) reference to the QDGDF library.
+
+qdgdfv (video) library
+----------------------
+
+	int _qdgdfv_double_mode;
+	int _qdgdfv_screen_x_size;
+	int _qdgdfv_screen_y_size;
+	int _qdgdfv_window_x;
+	int _qdgdfv_window_y;
+	char _qdgdfv_window_title[150];
+	int _qdgdfv_additional_int_info;
+	void qdgdfv_startup(void);
+	void qdgdfv_shutdown(void);
+
+Startup basic info. _qdgdfv_screen_x_size and _qdgdfv_screen_y_size
+define the wanted window (or screen) dimensions; _qdgdfv_window_x
+and _qdgdfv_window_y specify the original position of the window
+(of course, this is meaningless in full screen mode).
+_qdgdfv_double_mode, qdgdfv_window_title and
+_qdgdfv_additional_int_info act as described before. Please note
+that _qdgdfv_screen_x_size and _qdgdfv_screen_y_size values after
+calling qdgdfv_startup() can be different from what you filled
+them with (you must obey these values and not assume yours).
+
+	int _qdgdfv_palette[3*256];
+
+This array contains by default the qdgdf suggested palette. If you
+want to use yours, fill this array before calling qdgdfv_startup().
+
+	unsigned char * _qdgdfv_virtual_screen;
+	unsigned char _qdgdfv_clear_color;
+	void qdgdfv_clear_virtual_screen(void);
+	void qdgdfv_dump_virtual_screen(void);
+
+qdgdfv_clear_virtual_screen() fills the space pointed to by
+_qdgdfv_virtual_screen with _qdgdfv_clear_color. You can fill that
+virtual screen with whatever you want and assume it has enough
+space to hold _qdgdfv_screen_x_size * _qdgdfv_screen_y_size bytes.
+Once done, you can dump it to the real screen using
+qdgdfv_dump_virtual_screen().
+
+	int _qdgdfv_key_up;
+	int _qdgdfv_key_down;
+	int _qdgdfv_key_left;
+	int _qdgdfv_key_right;
+	int _qdgdfv_key_escape;
+	int _qdgdfv_key_space;
+	int _qdgdfv_key_enter;
+	int _qdgdfv_key_control_l;
+	int _qdgdfv_key_control_r;
+	void qdgdfv_input_poll(void);
+
+The input polling system. After a call to qdgdfv_input_pool(),
+these variables will be nonzero if any of the associated keys are
+pressed.
+
+	void qdgdfv_load_pcx(unsigned char * pcx, char * pcxfile, int size);
+
+This routine allows to load 256 color PCX files. The array pcx
+must point to a buffer (you must allocate it or have it
+static). The file to load is pcxfile. The palette inside these
+files is ignored; if it is not the same than the one defined in
+_qdgdfv_palette[], the results will be undetermined (and, very
+possibly, funny looking).
+
+	unsigned char qdgdfv_seek_color(int r, int g, int b);
+
+This function finds the nearest color that matches r, g, b
+(0-255 range). If, for instance, you want to fill your screen
+with pure blue, you can do
+
+	_qdgdfv_clear_color=qdgdfv_seek_color(0,0,255);
+	qdgdfv_clear_virtual_screen();
+	qdgdfv_dump_virtual_screen();
+
+If you don't have pure blue in your palette, the more similar
+color will be returned instead.
+
+	int qdgdfv_timer(int reset);
+
+Returns the elapsed time between calls, in milliseconds. If reset
+is set to 1, the timer is reset any time the function is called,
+or accumulative otherwise. It's mainly used for calculating the
+elapsed time per frame. It's wise to reset the timer just before
+entering the main loop.
+
+	int _qdgdfv_use_logger;
+	char _qdgdfv_logger_file[150];
+	void qdgdfv_logger(char * where, char * msg);
+
+qdgdfv includes a simple logger to make life easier. If you set
+_qdgdfv_use_logger to 1 and _qdgdfv_logger_file[] to some file
+name, you will be able to do some logging with qdgdfv_logger().
+
+	void qdgdfv_build_light_table(unsigned char * lut, 
+		int levels, int mid);
+	void qdgdfv_build_light_table_ext(unsigned char * lut,
+		int levels, int mid, int fr, int fg, int fb);
+
+qdgdfv_build_light_table() builds a light table with the number of
+levels indicated; lut must be a two dimensional array, as in
+
+	unsigned char lut[levels][256];
+
+The mid parameter sets the 'middle' light level, that is, the one
+where colors are 100% (normal) lit. Below colors will be darker; above
+colors will saturate and be brighter than the original. Example:
+
+	unsigned char lut[16][256];
+	unsigned char c, c1, c2, c3;
+
+	/* build a light table with 16 levels, where
+	   normal light is level 12 */
+	qdgdfv_build_light_table(&lut[0][0], 16, 12);
+
+	/* find a color */
+	c = qdgdfv_seek_color(230, 110, 35);
+
+	/* this color will be c, but darker (light level 5) */
+	c1 = lut[5][c];
+
+	/* this color will be c, but saturated (max level) */
+	c2 = lut[15][c];
+
+	/* this color will be the same as c, as 12 is the
+	   normal light level */
+	c3 = lut[12][c];
+
+qdgdfv_build_light_table_ext() is like qdgdfv_build_light_table(),
+but a fade color (instead of black) for low light levels can be
+specified (looks great to simulate red or green fogs).
+
+	void volatile qdgdfv_bang(char * where, char * msg);
+	void * qdgdfv_malloc(int size);
+	FILE * qdgdfv_fopen(char * file, char * mode);
+
+qdgdfv_bang() just bangs (write a message and exit to system).
+qdgdfv_malloc() and qdgdfv_fopen() are just convenience routines
+that bang when unsuccessful.
+
+qdgdfa (audio) library
+----------------------
+
+	int _qdgdfa_sound;
+	char _qdgdfa_window_title[150];
+	int _qdgdfa_16_bit;
+	void qdgdfa_startup(void);
+	void qdgdfa_shutdown(void);
+
+Startup stuff. _qdgdfa_sound, when set to 0, just disables the
+whole thing. _qdgdfa_16_bit is usually set to 1 to use, whenever
+possible, 16 bit audio mode; if you don't want to use it (I
+don't know why you could want this), just set it to 0. If, after
+all, the sound card is just an 8 bit one or the 16 bit hardware
+could not be initialized, this variable will have a 0 after
+calling qdgfa_startup(). Remember to set _qdgdfa_window_title[] to
+the title the game window has, as previously described.
+
+	int qdgdfa_load_sound(char * wavfile);
+	int qdgdfa_dup_sound(int snd);
+
+Loads the wavfile, that must be 8/16 bit mono at 11025 Hz. If
+succesful, a positive integer is returned, that can be used to do
+whatever possible things with a sound can be done.
+
+qdgdfa_dup_sound() returns a sound handle that shares the audio
+wave with the original and can be launched separately and / or
+simultaneously. For a more transparent way of playing the same
+sound several times, see qdgdfa_respawn_sound().
+
+	void qdgdfa_play_sound(int snd, int loop);
+	void qdgdfa_stop_sound(int snd);
+	void qdgdfa_set_pan(int snd, int pan);
+
+These routines do obvious things with a sound. If loop is 1, the
+sound is played in a neverending, at-nauseam loop play. pan can
+be -1, 0 or 1 if you want the sound to be left, center o right
+channel biased. If a sound is already being played,
+qdgdfa_play_sound() does nothing.
+
+	void qdgdfa_respawn_sound(int snd);
+
+qdgdfa_respawn_sound() allows a sound to be played more than once
+simultaneously. It's like qdgdfa_play_sound(), but duplicating
+the original one. The launched sound cannot be stopped nor played
+in a loop. It's like a 'multitasking' version of qdgdfa_play_sound().
+
+	void qdgdfa_reset(void);
+	void qdgdfa_pause(int p);
+
+qdgdfa_reset() resets all the sound system, unloading all sound
+files from memory. All sound file descriptors become invalid.
+qdgdfa_pause() just pauses/unpauses all sound.
+
+----
+
+Angel Ortega - http://triptico.com
